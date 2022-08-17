@@ -1,8 +1,10 @@
 const http = require('http')
 const app = require('./app')
 const mountSocket = require('./socket/socket-io')
+const logger = require('./helpers/winston')
+//
 const port = process.env.PORT
 //
 const server = http.createServer(app)
 mountSocket(server)
-server.listen(port, () => console.log('server start now'))
+server.listen(port, () => logger.info('server starts at' + new Date().toISOString()))
