@@ -10,7 +10,7 @@ const userController = {
   signIn: (req, res) => {
     if (helpers.getUser(req).role === 'admin') {
       req.flash('error_messages', '帳號不存在！')
-      req.logout()
+      req.logout(() => {})
       res.redirect('/signin')
     }
     req.flash('success_messages', '登入成功!')
@@ -49,7 +49,7 @@ const userController = {
   },
   logout: (req, res) => {
     req.flash('success_messages', '登出成功!')
-    req.logout()
+    req.logout(() => {})
     res.redirect('/signin')
   },
   getSetting: (req, res, next) => {

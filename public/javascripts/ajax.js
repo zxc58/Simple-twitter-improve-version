@@ -3,7 +3,6 @@ function toggleLike (likeBtn) {
   const tweetId = Number(likeBtn.dataset.tweetId)
   const icon = likeBtn.querySelector('i')
   const spanLikeNumber = likeBtn.querySelector('span') || document.getElementById('totalLike')
-  // console.log(isLiked)
   if (isLiked) {
     axios.post(`/tweets/${tweetId}/unlike`, null, {
       validateStatus: status => status >= 200 && status <= 302
