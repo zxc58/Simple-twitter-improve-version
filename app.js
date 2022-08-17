@@ -13,7 +13,7 @@ const { engine } = require('express-handlebars')
 const methodOverride = require('method-override')
 const { getUser } = require('./_helpers')
 const handlebarsHelpers = require('./helpers/handlebars-helpers')
-const helmet = require('helmet')
+const customHelmet = require('./middleware/helmet')
 
 // Define Variable
 const sessionSecret = process.env.SESSION_SECRET
@@ -28,8 +28,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(express.static('public'))
 app.use(session({ secret: sessionSecret, resave: false, saveUninitialized: false }))
-app.use(helmet.xssFilter())
-app.use(helmet.hidePoweredBy())
+app.use(customHelmet)
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
