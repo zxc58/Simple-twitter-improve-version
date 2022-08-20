@@ -16,7 +16,9 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "CLEARDB_DATABASE_URL"
+    "dialect": "mysql",
+    "use_env_variable": "DB_CONNECTION_STRING",
+    "database": "database-for-simple-twitter"
   },
   "travis": {
     "username": "travis",

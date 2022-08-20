@@ -14,7 +14,7 @@ const methodOverride = require('method-override')
 const { getUser } = require('./_helpers')
 const handlebarsHelpers = require('./helpers/handlebars-helpers')
 const customHelmet = require('./middleware/helmet')
-
+const path = require('path')
 // Define Variable
 const sessionSecret = process.env.SESSION_SECRET
 
@@ -26,7 +26,7 @@ app.set('views', './views')
 app.use(methodOverride('_method'))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, 'public')))
 app.use(session({ secret: sessionSecret, resave: false, saveUninitialized: false }))
 app.use(customHelmet)
 app.use(passport.initialize())

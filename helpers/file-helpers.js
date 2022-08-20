@@ -17,7 +17,11 @@ const imgurFileHandler = file => {
     if (!file) return resolve(null)
     return imgur.uploadFile(file.path)
       .then(img => {
-        resolve(img?.link || null)
+        if (img.link) {
+          resolve(img.link)
+        } else {
+          resolve(null)
+        }
       })
       .catch(err => reject(err))
   })
