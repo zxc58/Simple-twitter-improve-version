@@ -6,17 +6,16 @@ if (process.env.NODE_ENV !== 'production') {
 // Requirements
 const express = require('express')
 const flash = require('connect-flash')
-const session = require('express-session')
 const passport = require('./config/passport')
 const routes = require('./routes')
 const { engine } = require('express-handlebars')
 const methodOverride = require('method-override')
+const path = require('path')
 const { getUser } = require('./_helpers')
 const handlebarsHelpers = require('./helpers/handlebars-helpers')
 const customHelmet = require('./middleware/helmet')
-const path = require('path')
+const sessionConfiguration = require('./config/session')
 // Define Variable
-const sessionSecret = process.env.SESSION_SECRET
 
 // Setting Application
 const app = express()
@@ -28,7 +27,7 @@ app.use(methodOverride('_method'))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(session({ secret: sessionSecret, resave: false, saveUninitialized: false }))
+app.use(sessionConfiguration)
 app.use(customHelmet)
 app.use(passport.initialize())
 app.use(passport.session())

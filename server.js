@@ -7,4 +7,4 @@ const port = process.env.PORT
 //
 const server = http.createServer(app)
 io.attach(server)
-server.listen(port, () => logger.info('server starts at' + new Date().toISOString()))
+server.listen(port, () => logger.info('server starts at ' + new Date().toISOString()))
