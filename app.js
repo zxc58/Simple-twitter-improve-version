@@ -20,6 +20,7 @@ const sessionSecret = process.env.SESSION_SECRET
 
 // Setting Application
 const app = express()
+app.set('trust proxy', 1)
 app.engine('.hbs', engine({ extname: '.hbs', helpers: handlebarsHelpers }))
 app.set('view engine', '.hbs')
 app.set('views', './views')
