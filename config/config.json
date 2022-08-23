@@ -18,7 +18,8 @@
   "production": {
     "dialect": "mysql",
     "use_env_variable": "DB_CONNECTION_STRING",
-    "database": "database-for-simple-twitter"
+    "database": "database-for-simple-twitter",
+    "logging": false
   },
   "travis": {
     "username": "travis",
