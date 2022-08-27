@@ -6,9 +6,7 @@
         <hr/>
         {{#if userSearchResult}}
             {{#each userSearchResult}}
-                {{#ifCond this.id ../logInUser.id}}
-                {{else}}    {{> followship-block}}
-                {{/ifCond}}
+                {{> followship-block}}
             {{/each}}
         {{else}}
         <h3 class="text-center">No result</h3>

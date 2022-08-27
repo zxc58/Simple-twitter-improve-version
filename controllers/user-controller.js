@@ -22,6 +22,7 @@ const userController = {
   },
   signUp: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
+    // eslint-disable-next-line no-useless-escape
     const emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
     if (!account || !email || !password) throw new Error('請確實填寫欄位!')
     if (password !== checkPassword) throw new Error('請確認密碼!')
@@ -66,6 +67,7 @@ const userController = {
   putSetting: (req, res, next) => {
     const id = Number(req.params.id)
     const { account, name, email, password, passwordCheck } = req.body
+    // eslint-disable-next-line no-useless-escape
     const emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
 
     if (!account) throw new Error('請輸入帳號!')
@@ -279,7 +281,24 @@ const userController = {
       const name = req.query.q || null
       if (name === null) { throw new Error("User didn't exists!") }
       const [userSearchResult, topUsers] = await Promise.all([
-        User.findAll({ where: { name: { [Op.regexp]: name } }, raw: true, nest: true }),
+        User.findAll({
+          where: { name: { [Op.regexp]: name }, role: 'user', id: { [Op.ne]: helpers.getUser(req).id } },
+          include: {
+            model: User,
+            as: 'Followers',
+            attributes: [],
+            duplicating: false,
+            through: {
+              attributes: []
+            }
+          },
+          attributes: ['id', 'name', 'account', 'avatar', 'introduction',
+            [sequelize.fn('MAX', sequelize.fn('IF', sequelize.literal('`Followers`.`id` - ' + helpers.getUser(req).id + ' = 0'), 1, 0)), 'isFollowed']
+          ],
+          group: 'id',
+          raw: true,
+          nest: true
+        }),
         catchTopUsers(req)
       ])
       return res.render('search', { userSearchResult, q: name, topUsers })

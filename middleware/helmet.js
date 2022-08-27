@@ -6,7 +6,8 @@ const helmetArray = []
 helmetArray.push(helmet.contentSecurityPolicy())
 const options = {
   contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: 'same-origin' }
 }
 // Exports
 module.exports = helmet(options)
