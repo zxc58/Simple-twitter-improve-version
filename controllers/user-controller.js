@@ -3,6 +3,7 @@ const db = require('../models')
 const helpers = require('../_helpers')
 const { User, Tweet, Reply, Like, sequelize } = db
 const { catchTopUsers } = require('../helpers/sequelize-helper')
+const { Op } = require('sequelize')
 const userController = {
   signInPage: (req, res) => {
     res.render('signin')
@@ -25,7 +26,7 @@ const userController = {
     if (!account || !email || !password) throw new Error('請確實填寫欄位!')
     if (password !== checkPassword) throw new Error('請確認密碼!')
     if (name.length > 50) throw new Error('字數超出上限！')
-    if (email.search(emailRule) == -1) throw new Error('請確認Email格式!')
+    if (email.search(emailRule) === -1) throw new Error('請確認Email格式!')
     Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } })])
       .then(([userEmail, userAccount]) => {
         if (userEmail) throw new Error('email 已重複註冊！')
@@ -69,7 +70,7 @@ const userController = {
 
     if (!account) throw new Error('請輸入帳號!')
     if (!email) throw new Error('請輸入Email!')
-    if (email.search(emailRule) == -1) throw new Error('請確認Email格式!')
+    if (email.search(emailRule) === -1) throw new Error('請確認Email格式!')
     if (!password) throw new Error('請輸入密碼!')
     if (password !== passwordCheck) throw new Error('請確認密碼!')
     Promise.all([
@@ -269,6 +270,19 @@ const userController = {
         tweetsCounts,
         followings
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  searchUser: async (req, res, next) => {
+    try {
+      const name = req.query.q || null
+      if (name === null) { throw new Error("User didn't exists!") }
+      const [userSearchResult, topUsers] = await Promise.all([
+        User.findAll({ where: { name: { [Op.regexp]: name } }, raw: true, nest: true }),
+        catchTopUsers(req)
+      ])
+      return res.render('search', { userSearchResult, q: name, topUsers })
     } catch (err) {
       next(err)
     }

@@ -8,5 +8,5 @@ router.get('/:id/replies', authenticated, userController.getReplies)
 router.get('/:id/likes', authenticated, userController.getLikes)
 router.get('/:id/followers', authenticated, userController.getFollowers)
 router.get('/:id/followings', authenticated, userController.getFollowings)
-
+router.get('/search', authenticated, userController.searchUser)
 module.exports = router
