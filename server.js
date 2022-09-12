@@ -1,6 +1,6 @@
 const http = require('http')
 const app = require('./app')
-const io = require('./socket/socket-io')
+const io = require('./socket')
 const logger = require('./helpers/winston')
 //
 const port = process.env.PORT
