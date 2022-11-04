@@ -10,9 +10,10 @@ const userController = {
   },
   signIn: (req, res) => {
     if (helpers.getUser(req).role === 'admin') {
-      req.flash('error_messages', '帳號不存在！')
-      req.logout(() => {})
-      res.redirect('/signin')
+      return req.logout(() => {
+        req.flash('error_messages', '帳號不存在！')
+        res.redirect('/signin')
+      })
     }
     req.flash('success_messages', '登入成功!')
     res.redirect('/tweets')
@@ -50,9 +51,10 @@ const userController = {
       .catch(err => next(err))
   },
   logout: (req, res) => {
-    req.flash('success_messages', '登出成功!')
-    req.logout(() => {})
-    res.redirect('/signin')
+    return req.logout(() => {
+      req.flash('success_messages', '登出成功!')
+      res.redirect('/signin')
+    })
   },
   getSetting: (req, res, next) => {
     const id = Number(req.params.id)
