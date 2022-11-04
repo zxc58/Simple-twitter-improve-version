@@ -8,8 +8,6 @@
 
     <div class="d-flex flex-wrap justify-content-center">
       {{#each users}}
-      {{#ifCond this.role 'admin'}}
-      {{else}}
       <div class="card me-3 border-0" style="width: 15rem;">
         <div class=" d-flex flex-column align-items-center">
           {{!-- cover --}}
@@ -27,12 +25,11 @@
             <i class="far fa-heart text-secondary ms-3 me-2"></i><span>{{this.likeCount}}</span>
           </p>
           <p>
-            <span>{{this.followings}} 個</span><span class="text-secondary">跟隨中</span>
-            <span class="ms-2">{{this.followers}} 位</span><span class="text-secondary">跟隨者</span>
+            <span>{{this.followingCount}} 個</span><span class="text-secondary">跟隨中</span>
+            <span class="ms-2">{{this.followerCount}} 位</span><span class="text-secondary">跟隨者</span>
           </p>
         </div>
       </div>
-      {{/ifCond}}
       {{/each}}
     </div>
   </div>
