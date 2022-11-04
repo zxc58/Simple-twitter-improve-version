@@ -1,24 +1,16 @@
-const db = require('../models')
 const helpers = require('../_helpers')
-const { User, Tweet, sequelize, Like, Reply, Message } = db
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { relativeTimeFromNow } = require('../helpers/handlebars-helpers')
-const { Op } = require('sequelize')
+const { getPersonalData, fetchSomeTweets, getChatHistory, hasNewMessage, seeMessages } = require('../sequelize/api')
+const [rowLimit] = [20]
+
 const apiController = {
   getUser: async (req, res, next) => {
     try {
-      const currentUser = helpers.getUser(req)
-      const UserId = req.params.id
-      const user = await User.findOne({
-        where: { id: UserId },
-        include: [
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' }
-        ]
-      })
-      if (currentUser.id !== user.id) {
+      const id = Number(req.params.id)
+      if (helpers.getUser(req).id !== id) {
         return res.json({ status: 'error', messages: '無法編輯其他使用者資料！' })
       }
+      const user = await getPersonalData(id)
       res.json(user.toJSON())
     } catch (err) {
       next(err)
@@ -27,88 +19,45 @@ const apiController = {
   putUser: async (req, res, next) => {
     try {
       const logInUserId = helpers.getUser(req).id
-      const UserId = req.params.id
+      const id = Number(req.params.id)
       const { name } = req.body
       const introduction = req.body.introduction || ''
-      const avatar = req.files ? req.files.avatar : ''
-      const cover = req.files ? req.files.cover : ''
+      const avatar = req?.files?.avatar
+      const cover = req?.files?.cover
 
-      let uploadAvatar = ''
-      let uploadCover = ''
-      if (avatar) {
-        uploadAvatar = await imgurFileHandler(avatar[0])
-      }
-      if (cover) {
-        uploadCover = await imgurFileHandler(cover[0])
-      }
-      const user = await User.findByPk(UserId)
-
-      if (user.id !== Number(logInUserId)) return res.json({ status: 'error', message: '不可編輯其他使用者資料！' })
+      if (id !== Number(logInUserId)) return res.json({ status: 'error', message: '不可編輯其他使用者資料！' })
       if (!name) return res.json({ status: 'error', message: '名稱不可空白！' })
       if (name.length > 50) return res.json({ status: 'error', message: '字數超出上限！' })
       if (introduction.length > 160) return res.json({ status: 'error', message: '字數超出上限！' })
 
-      const data = await user.update({
-        name,
-        introduction,
-        avatar: uploadAvatar || user.avatar,
-        cover: uploadCover || user.cover
-      })
+      const tasks = [getPersonalData(id)]
+      tasks.push(avatar ? imgurFileHandler(avatar[0]) : false)
+      tasks.push(cover ? imgurFileHandler(cover[0]) : false)
+      const [user, uploadAvatar, uploadCover] = await Promise.all(tasks);
+      [user.name, user.introduction, user.avatar, user.cover] = [name, introduction, uploadAvatar || user.avatar, uploadCover || user.cover]
+      const data = await user.save()
       res.json({ status: 'success', message: '已成功更新!', data })
     } catch (err) {
       next(err)
     }
   },
-  getTweets: (req, res, next) => {
-    const { tweetsIds } = req.body
-    return Tweet.findAll({
-      where: {
-        id: { [Op.notIn]: tweetsIds }
-      },
-      include: [{
-        model: User,
-        attributes: ['id', 'name', 'avatar', 'account']
-      }, {
-        model: Like, attributes: [], duplicating: false
-      }, {
-        model: Reply, attributes: [], duplicating: false
-      }],
-      attributes: {
-        include: [
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'],
-          [sequelize.fn('MAX', sequelize.fn('IF', sequelize.literal('`Likes`.`UserId`-' + helpers.getUser(req).id + '=0'), 1, 0)), 'isLiked']
-        ]
-      },
-      group: 'Tweet.id',
-      order: [['createdAt', 'DESC']],
-      limit: 20,
-      raw: true,
-      nest: true
-    }).then(tweets => {
-      if (tweets) {
-        for (const tweet of tweets) {
-          tweet.updatedAt = relativeTimeFromNow(tweet.updatedAt)
-        }
-      }
+  getTweets: async (req, res, next) => {
+    try {
+      const { tweetsIds } = req.body
+      const tweets = await fetchSomeTweets(tweetsIds, rowLimit, helpers.getUser(req).id)
       return res.json({ tweets, logInUser: helpers.getUser(req) })
-    }).catch(err => next(err))
+    } catch (error) {
+      next(error)
+    }
   },
   getMessages: async (req, res, next) => {
     try {
-      const self = helpers.getUser(req).id
-      const other = Number(req.params.id)
+      const myId = helpers.getUser(req).id
+      const otherId = Number(req.params.id)
       const [chatHistory, newMessage] = await Promise.all([
-        Message.findAll({
-          where: {
-            [Op.or]: [{ senderId: self, receiverId: other }, { senderId: other, receiverId: self }]
-          },
-          order: [[sequelize.col('createdAt'), 'ASC']],
-          raw: true,
-          nest: true
-        }),
-        Message.findOne({ where: { senderId: { [Op.ne]: other }, receiverId: self, beenSeen: 0 } }),
-        Message.update({ beenSeen: 1 }, { where: { senderId: other, receiverId: self } })
+        getChatHistory(myId, otherId),
+        hasNewMessage(myId, otherId),
+        seeMessages(myId, otherId)
       ])
       res.json({ status: 'success', data: chatHistory, newMessage: !!newMessage })
     } catch (err) {
