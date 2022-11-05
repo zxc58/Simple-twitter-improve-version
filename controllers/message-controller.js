@@ -6,7 +6,7 @@ const messageController = {
     try {
       const id = helpers.getUser(req).id
       const chatUsers = await getChatUsers(id)
-      res.render('chat', { chatUsers })
+      return res.render('chat', { chatUsers })
     } catch (err) {
       next(err)
     }
@@ -15,8 +15,11 @@ const messageController = {
     try {
       const id = helpers.getUser(req).id
       const newChattingId = Number(req.params.id)
-      const [chatUsers, newChatting] = await Promise.all([getChatUsers(id), getPersonalData(newChattingId)])
-      res.render('chat', { chatUsers, newChatting: newChatting.toJSON() })
+      const [chatUsers, newChatting] = await Promise.all([
+        getChatUsers(id),
+        getPersonalData(newChattingId)
+      ])
+      return res.render('chat', { chatUsers, newChatting: newChatting.toJSON() })
     } catch (err) {
       next(err)
     }

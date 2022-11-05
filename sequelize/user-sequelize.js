@@ -1,6 +1,6 @@
 const { User, Tweet, Like, Message, sequelize, Sequelize } = require('../models')
 const { Op } = Sequelize
-
+const [topUsersQuantity] = [5]
 const userSequelize = {
   getAllUsers: () => User.findAll({
     where: {
@@ -42,6 +42,31 @@ const userSequelize = {
     group: sequelize.col('User.id'),
     raw: true,
     nest: true
+  }),
+
+  getTopUsers: (userId) => User.findAll({
+    where: {
+      id: { [Op.ne]: userId }, role: 'user'
+    },
+    include: {
+      model: User,
+      as: 'Followers',
+      attributes: [],
+      duplicating: false,
+      through: {
+        attributes: []
+      }
+    },
+    attributes: ['id', 'name', 'account', 'avatar',
+      [sequelize.fn('COUNT', sequelize.col('Followers.id')), 'totalFollower'],
+      [sequelize.fn('MAX', sequelize.fn('IF', sequelize.literal('`Followers`.`id` - ' + userId + ' = 0'), 1, 0)), 'isFollowed']
+    ],
+    group: 'id',
+    order: [[sequelize.col('totalFollower'), 'DESC']],
+    limit: topUsersQuantity,
+    raw: true,
+    nest: true
   })
+
 }
 module.exports = userSequelize

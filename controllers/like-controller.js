@@ -1,4 +1,4 @@
-const { gettweet } = require('../sequelize/tweet-sequelize')
+const { getTweet } = require('../sequelize/tweet-sequelize')
 const { postLike, deleteLike } = require('../sequelize/like-sequelize')
 const helpers = require('../_helpers')
 const logger = require('../helpers/winston')
@@ -8,7 +8,7 @@ const likeController = {
     try {
       const userId = helpers.getUser(req).id
       const tweetId = Number(req.params.id)
-      const tweet = await gettweet(tweetId)
+      const tweet = await getTweet(tweetId)
       if (!tweet) { return res.status(400).json({ status: false, message: 'This tweet id do not exist' }) }
       await postLike(userId, tweetId)
       return res.status(302).json({ status: true, message: 'Post like successfully' })

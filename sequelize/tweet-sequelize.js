@@ -3,20 +3,28 @@ const { Op } = Sequelize
 const [subDescriptionLength] = [50]
 
 const tweetSequelize = {
-  gettweet: (TweetId) => Tweet.findByPk(TweetId),
+  getTweet: (tweetId, userId = -1) => Tweet.findByPk(tweetId, {
+    include: [
+      { model: User },
+      { model: Like }
+    ],
+    attributes: {
+      include: [
+        [sequelize.fn('COUNT', sequelize.col('Likes.id')), 'totalLike'],
+        [sequelize.fn('MAX', sequelize.fn('IF', sequelize.literal('`Likes`.`UserId`-' + userId + '=0'), 1, 0)), 'isLiked']
+      ]
+    }
+  }),
 
   fetchSomeTweets: (tweetsIds, rowLimit, userId) => Tweet.findAll({
     where: {
       id: { [Op.notIn]: tweetsIds }
     },
-    include: [{
-      model: User,
-      attributes: ['id', 'name', 'avatar', 'account']
-    }, {
-      model: Like, attributes: [], duplicating: false
-    }, {
-      model: Reply, attributes: [], duplicating: false
-    }],
+    include: [
+      { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+      { model: Like, attributes: [], duplicating: false },
+      { model: Reply, attributes: [], duplicating: false }
+    ],
     attributes: {
       include: [
         [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'],
