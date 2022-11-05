@@ -1,40 +1,31 @@
-const db = require('../models')
-const { User, Followship } = db
+const { getPersonalData } = require('../sequelize/user-sequelize')
+const { postFollowship, deleteFollowship } = require('../sequelize/followship-sequelize')
+
 const helpers = require('../_helpers')
 const followshipController = {
-  postFollowship: (req, res, next) => {
-    const followingId = Number(req.body.id)
-    const followerId = helpers.getUser(req).id
-    if (followingId === followerId) {
-      return res.json(new Error('followingId=followerId'))
+  postFollowship: async (req, res, next) => {
+    try {
+      const followingId = Number(req.body.id)
+      const followerId = helpers.getUser(req).id
+      if (followingId === followerId) { throw new Error('Following id = follower id') }
+      const following = await getPersonalData(followingId)
+      if (!following) { throw new Error('This user id do not exist') }
+      await postFollowship(followerId, followingId)
+      return res.redirect(`${req.get('Referrer')}`)
+    } catch (error) {
+      next(error)
     }
-    return User.findByPk(followingId).then(user => {
-      if (!user) { throw new Error('This user id do not exist') }
-      return Followship.findOrCreate({
-        where: {
-          followerId,
-          followingId
-        }
-      })
-    })
-      .then(() => res.redirect(`${req.get('Referrer')}`))
-      .catch(err => next(err))
   },
-  deleteFollowship: (req, res, next) => {
-    const followingId = Number(req.params.id)
-    const followerId = helpers.getUser(req).id
-    return Followship.findOne({
-      where: {
-        followerId,
-        followingId
-      }
-    }).then(followship => {
-      if (!followship) {
-        throw new Error('this followship do not exist')
-      }
-      return followship.destroy()
-    }).then(() => res.redirect(`${req.get('Referrer')}`))
-      .catch(err => next(err))
+
+  deleteFollowship: async (req, res, next) => {
+    try {
+      const followingId = Number(req.params.id)
+      const followerId = helpers.getUser(req).id
+      await deleteFollowship(followerId, followingId)
+      return res.redirect(`${req.get('Referrer')}`)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 module.exports = followshipController
