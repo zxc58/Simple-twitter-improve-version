@@ -1,37 +1,34 @@
-const db = require('../models')
-const { Tweet, Like } = db
+const { gettweet } = require('../sequelize/tweet-sequelize')
+const { postLike, deleteLike } = require('../sequelize/like-sequelize')
 const helpers = require('../_helpers')
+const logger = require('../helpers/winston')
+
 const likeController = {
-  likeTweet: (req, res, next) => {
-    const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
-    return Tweet.findByPk(TweetId)
-      .then(tweet => {
-        if (!tweet) {
-          throw new Error('This tweet id do not exist')
-        }
-        return Like.findOrCreate({ where: { UserId, TweetId } })
-      })
-      .then(() => res.status(302).json({}))
-      .catch(err => next(err))
+  likeTweet: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const tweetId = Number(req.params.id)
+      const tweet = await gettweet(tweetId)
+      if (!tweet) { return res.status(400).json({ status: false, message: 'This tweet id do not exist' }) }
+      await postLike(userId, tweetId)
+      return res.status(302).json({ status: true, message: 'Post like successfully' })
+    } catch (error) {
+      logger.error('Time: ' + new Date().toISOString() + '\n' + error)
+      res.status(500).json({ status: false, message: 'Server error' })
+    }
   },
-  unlikeTweet: (req, res, next) => {
-    const UserId = helpers.getUser(req).id
-    const TweetId = req.params.id
-    return Like.findOne({
-      where: {
-        UserId,
-        TweetId
-      }
-    })
-      .then(like => {
-        if (!like) {
-          throw new Error('This tweet id do not exist')
-        }
-        return like.destroy()
-      })
-      .then(() => res.status(302).json({}))
-      .catch(err => next(err))
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const tweetId = Number(req.params.id)
+      const result = await deleteLike(userId, tweetId)
+      if (!result) { return res.status(400).json({ status: false, message: 'This tweet id do not exist' }) }
+      return res.status(302).json({ status: true, message: 'Delete like successfully' })
+    } catch (error) {
+      logger.error('Time: ' + new Date().toISOString() + '\n' + error)
+      res.status(500).json({ status: false, message: 'Server error' })
+    }
   }
 }
+
 module.exports = likeController

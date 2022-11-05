@@ -21,7 +21,8 @@ const followshipController = {
     try {
       const followingId = Number(req.params.id)
       const followerId = helpers.getUser(req).id
-      await deleteFollowship(followerId, followingId)
+      const result = await deleteFollowship(followerId, followingId)
+      if (!result) { throw new Error('Followship do not exsit') }
       return res.redirect(`${req.get('Referrer')}`)
     } catch (error) {
       next(error)
