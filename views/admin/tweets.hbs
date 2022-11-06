@@ -20,7 +20,7 @@
             <span class="text-secondary">{{relativeTimeFromNow this.updatedAt}}</span>
           </p>
           {{!-- tweet --}}
-          <p>{{this.description}}</p>
+          <p>{{this.subDescription}}</p>
         </div>
         <div class="col-1 my-0 py-0">
           <form action="/admin/tweets/{{this.id}}?_method=DELETE" method="POST" style="display: inline;">

@@ -1,4 +1,5 @@
-const { getAllUsers, getAllTweets, deleteTweet } = require('../sequelize/admin')
+// const { getAllUsers, getAllTweets, deleteTweet } = require('../sequelize/admin')
+const { userServices, tweetServices } = require('../services')
 const helpers = require('../_helpers')
 const adminController = {
   signInPage: (req, res) => {
@@ -11,12 +12,12 @@ const adminController = {
         res.redirect('/signin')
       })
     }
-    req.flash('success_messages', 'Admin成功登入！')
+    req.flash('success_messages', 'Admin成功登入!')
     res.redirect('/admin/tweets')
   },
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await getAllTweets()
+      const tweets = await tweetServices.previewAllTweets()
       return res.render('admin/tweets', { tweets })
     } catch (error) {
       next(error)
@@ -25,7 +26,7 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
-      const isDeleted = await deleteTweet(id)
+      const isDeleted = await tweetServices.deleteTweet(id)
       if (!isDeleted) { throw new Error('No such tweet in Database') }
       return res.redirect('/admin/tweets')
     } catch (error) {
@@ -34,7 +35,7 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const users = await getAllUsers()
+      const users = await userServices.getAllUsers()
       return res.render('admin/users', { users })
     } catch (error) {
       next(error)

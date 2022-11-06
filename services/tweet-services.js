@@ -45,7 +45,7 @@ const tweetSequelize = {
     include: [User],
     order: [['createdAt', 'DESC']],
     attributes: {
-      include: [[sequelize.fn('SUBSTRING', sequelize.col('description'), 0, subDescriptionLength), 'subDescriptionLength']]
+      include: [[sequelize.fn('SUBSTRING', sequelize.col('Tweet.description'), 1, subDescriptionLength), 'subDescription']]
     }
   }),
 

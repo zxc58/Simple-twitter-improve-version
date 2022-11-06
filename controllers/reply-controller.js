@@ -1,6 +1,7 @@
-const { getTweetReply, reply } = require('../sequelize/reply-sequelize')
-const { getTweet } = require('../sequelize/tweet-sequelize')
-const { getTopUsers } = require('../sequelize/user-sequelize')
+// const { getTweetReply, reply } = require('../sequelize/reply-sequelize')
+// const { getTweet } = require('../sequelize/tweet-sequelize')
+// const { getTopUsers } = require('../sequelize/user-sequelize')
+const { replyServices, userServices, tweetServices } = require('../services')
 const helpers = require('../_helpers')
 
 const replyController = {
@@ -9,9 +10,9 @@ const replyController = {
       const TweetId = Number(req.params.id)
       const userId = helpers.getUser(req).id
       const [tweet, topUsers, replies] = await Promise.all([
-        getTweet(TweetId, userId),
-        getTopUsers(userId),
-        getTweetReply(TweetId)
+        tweetServices.getTweet(TweetId, userId),
+        userServices.getTopUsers(userId),
+        replyServices.getTweetReply(TweetId)
       ])
       if (!tweet) { throw new Error('This tweet id do not exist') }
       return res.render('tweet', { tweet: tweet.toJSON(), topUsers, replies })
@@ -26,9 +27,9 @@ const replyController = {
       const tweetId = Number(req.params.id)
       const { comment } = req.body
       if (!(comment.length <= 140)) { throw new Error('String length exceeds range') }
-      const tweet = await getTweet(tweetId, userId)
+      const tweet = await tweetServices.getTweet(tweetId, userId)
       if (!tweet) { throw new Error('This tweet id do not exist') }
-      await reply(tweetId, userId, comment)
+      await replyServices.reply(tweetId, userId, comment)
       return res.redirect(`${req.get('Referrer')}`)
     } catch (error) {
       next(error)

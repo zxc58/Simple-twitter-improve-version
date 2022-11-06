@@ -1,6 +1,6 @@
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { getPersonalData, fetchSomeTweets, getChatHistory, hasNewMessage, seeMessages } = require('../sequelize/api')
+const { userServices, tweetServices, messageServices } = require('../services')
 const [rowLimit] = [20]
 
 const apiController = {
@@ -10,12 +10,13 @@ const apiController = {
       if (helpers.getUser(req).id !== id) {
         return res.json({ status: 'error', messages: '無法編輯其他使用者資料！' })
       }
-      const user = await getPersonalData(id)
+      const user = await userServices.getPersonalData(id)
       res.json(user.toJSON())
     } catch (err) {
       next(err)
     }
   },
+
   putUser: async (req, res, next) => {
     try {
       const logInUserId = helpers.getUser(req).id
@@ -24,13 +25,12 @@ const apiController = {
       const introduction = req.body.introduction || ''
       const avatar = req?.files?.avatar
       const cover = req?.files?.cover
-
       if (id !== Number(logInUserId)) return res.json({ status: 'error', message: '不可編輯其他使用者資料！' })
       if (!name) return res.json({ status: 'error', message: '名稱不可空白！' })
       if (name.length > 50) return res.json({ status: 'error', message: '字數超出上限！' })
       if (introduction.length > 160) return res.json({ status: 'error', message: '字數超出上限！' })
 
-      const tasks = [getPersonalData(id)]
+      const tasks = [userServices.getPersonalData(id)]
       tasks.push(avatar ? imgurFileHandler(avatar[0]) : false)
       tasks.push(cover ? imgurFileHandler(cover[0]) : false)
       const [user, uploadAvatar, uploadCover] = await Promise.all(tasks);
@@ -44,7 +44,7 @@ const apiController = {
   getTweets: async (req, res, next) => {
     try {
       const { tweetsIds } = req.body
-      const tweets = await fetchSomeTweets(tweetsIds, rowLimit, helpers.getUser(req).id)
+      const tweets = await tweetServices.fetchSomeTweets(tweetsIds, rowLimit, helpers.getUser(req).id)
       return res.json({ tweets, logInUser: helpers.getUser(req) })
     } catch (error) {
       next(error)
@@ -55,9 +55,9 @@ const apiController = {
       const myId = helpers.getUser(req).id
       const otherId = Number(req.params.id)
       const [chatHistory, newMessage] = await Promise.all([
-        getChatHistory(myId, otherId),
-        hasNewMessage(myId, otherId),
-        seeMessages(myId, otherId)
+        messageServices.getChatHistory(myId, otherId),
+        messageServices.hasNewMessage(myId, otherId),
+        messageServices.seeMessages(myId, otherId)
       ])
       res.json({ status: 'success', data: chatHistory, newMessage: !!newMessage })
     } catch (err) {
