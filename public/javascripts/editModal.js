@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const editModal = document.querySelector('#editProfileModal')
 const inputNameCounts = document.querySelector('.nameCounts')
 const inputIntroductionCounts = document.querySelector('.introductionCounts')

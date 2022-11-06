@@ -19,7 +19,7 @@ const messageController = {
         getChatUsers(id),
         getPersonalData(newChattingId)
       ])
-      return res.render('chat', { chatUsers, newChatting: newChatting.toJSON() })
+      return res.render('chat', { chatUsers, newChatting: JSON.stringify(newChatting.toJSON()) })
     } catch (err) {
       next(err)
     }

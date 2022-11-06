@@ -1,13 +1,26 @@
-const tweetsContainer = document.getElementById('tweetsContainer')
-const tweetsIds = JSON.parse(document.getElementById('idArray').innerHTML)
-//
-middle.addEventListener('scroll', scrollToEnd)
-//
-function scrollToEnd () {
-  if (middle.scrollHeight <= middle.scrollTop + window.innerHeight) {
-    middle.removeEventListener('scroll', scrollToEnd)
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+async function toggleLike () {
+  const isLiked = this.dataset.isLiked === 'true' || this.dataset.isLiked === true || this.dataset.isLiked === '1'
+  const tweetId = Number(this.dataset.tweetId)
+  const icon = this.querySelector('i')
+  const spanLikeNumber = this.querySelector('span') || document.getElementById('totalLike')
+
+  await axios.post(`/tweets/${tweetId}/${isLiked ? 'unlike' : 'like'}`, null, {
+    validateStatus: status => status >= 200 && status <= 302
+  })
+  icon.classList.toggle('fas')
+  icon.classList.toggle('far')
+  icon.classList.toggle('text-danger')
+  spanLikeNumber.innerHTML = isLiked ? `${Number(spanLikeNumber.innerHTML) - 1}` : `${Number(spanLikeNumber.innerHTML) + 1}`
+  this.dataset.isLiked = !isLiked
+}
+function ajaxTweets () {
+  const tweetsContainer = document.getElementById('tweetsContainer')
+  const tweetsIds = JSON.parse(document.getElementById('idArray').innerHTML)
+  if (this.scrollHeight <= this.scrollTop + window.innerHeight) {
+    this.removeEventListener('scroll', ajaxTweets)
     const apiUrl = '/api/tweets'
-    const tweetsHTML = ''
     axios.post(
       apiUrl, JSON.stringify({ tweetsIds }), { headers: { 'Content-Type': 'application/json' } }
     )
@@ -21,7 +34,8 @@ function scrollToEnd () {
             tweetsIds.push(tweet.id)
           }
           tweetsContainer.innerHTML += i
-          middle.addEventListener('scroll', scrollToEnd)
+          document.getElementById('idArray').innerHTML = JSON.stringify(tweetsIds)
+          this.addEventListener('scroll', ajaxTweets)
         }
       }).catch(err => console.log('apiTweetsError' + err))
   }

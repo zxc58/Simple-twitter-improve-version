@@ -71,7 +71,7 @@
                         </div>
                     </div>
                 </div>
-                <button class="border-0 bg-body" onclick="toggleLike(this)" data-is-liked={{tweet.isLiked}} data-tweet-id="{{tweet.id}}" >
+                <button class="border-0 bg-body" onclick="toggleLike.bind(this)()" data-is-liked="{{tweet.isLiked}}" data-tweet-id="{{tweet.id}}" >
                     {{#if tweet.isLiked}}
                     <i class="fas fa-heart text-danger"></i>
                     {{else}}
