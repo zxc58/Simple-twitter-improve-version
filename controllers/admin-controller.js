@@ -17,7 +17,7 @@ const adminController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await tweetServices.previewAllTweets()
+      const tweets = await tweetServices.previewAllTweets(req)
       return res.render('admin/tweets', { tweets })
     } catch (error) {
       next(error)
@@ -25,8 +25,7 @@ const adminController = {
   },
   deleteTweet: async (req, res, next) => {
     try {
-      const id = Number(req.params.id)
-      const isDeleted = await tweetServices.deleteTweet(id)
+      const isDeleted = await tweetServices.deleteTweet(req)
       if (!isDeleted) { throw new Error('No such tweet in Database') }
       return res.redirect('/admin/tweets')
     } catch (error) {
@@ -35,7 +34,7 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const users = await userServices.getAllUsers()
+      const users = await userServices.getAllUsers(req)
       return res.render('admin/users', { users })
     } catch (error) {
       next(error)

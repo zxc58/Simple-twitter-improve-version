@@ -1,7 +1,6 @@
 const helpers = require('../_helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { userServices, tweetServices, messageServices } = require('../services')
-const [rowLimit] = [20]
 
 const apiController = {
   getUser: async (req, res, next) => {
@@ -10,7 +9,7 @@ const apiController = {
       if (helpers.getUser(req).id !== id) {
         return res.json({ status: 'error', messages: '無法編輯其他使用者資料！' })
       }
-      const user = await userServices.getPersonalData(id)
+      const user = await userServices.getPersonalData(req)
       res.json(user.toJSON())
     } catch (err) {
       next(err)
@@ -30,7 +29,7 @@ const apiController = {
       if (name.length > 50) return res.json({ status: 'error', message: '字數超出上限！' })
       if (introduction.length > 160) return res.json({ status: 'error', message: '字數超出上限！' })
 
-      const tasks = [userServices.getPersonalData(id)]
+      const tasks = [userServices.getPersonalData(req)]
       tasks.push(avatar ? imgurFileHandler(avatar[0]) : false)
       tasks.push(cover ? imgurFileHandler(cover[0]) : false)
       const [user, uploadAvatar, uploadCover] = await Promise.all(tasks);
@@ -43,8 +42,7 @@ const apiController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const { tweetsIds } = req.body
-      const tweets = await tweetServices.fetchSomeTweets(tweetsIds, rowLimit, helpers.getUser(req).id)
+      const tweets = await tweetServices.fetchSomeTweets(req)
       return res.json({ tweets, logInUser: helpers.getUser(req) })
     } catch (error) {
       next(error)
@@ -52,12 +50,10 @@ const apiController = {
   },
   getMessages: async (req, res, next) => {
     try {
-      const myId = helpers.getUser(req).id
-      const otherId = Number(req.params.id)
       const [chatHistory, newMessage] = await Promise.all([
-        messageServices.getChatHistory(myId, otherId),
-        messageServices.hasNewMessage(myId, otherId),
-        messageServices.seeMessages(myId, otherId)
+        messageServices.getChatHistory(req),
+        messageServices.hasNewMessage(req),
+        messageServices.seeMessages(req)
       ])
       res.json({ status: 'success', data: chatHistory, newMessage: !!newMessage })
     } catch (err) {

@@ -5,7 +5,6 @@ async function toggleLike () {
   const tweetId = Number(this.dataset.tweetId)
   const icon = this.querySelector('i')
   const spanLikeNumber = this.querySelector('span') || document.getElementById('totalLike')
-
   await axios.post(`/tweets/${tweetId}/${isLiked ? 'unlike' : 'like'}`, null, {
     validateStatus: status => status >= 200 && status <= 302
   })
