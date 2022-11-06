@@ -55,7 +55,7 @@ function tweetHTML (tweet, avatar) {
                     <a href="/users/${tweet.User.id}/tweets" style="text-decoration:none; color:black;">
                         <span class="fw-bold linkText">${tweet.User.name}</span> 
                     </a>
-                    <small><a href="/users/${tweet.User.id}/tweets" style="text-decoration:none;color:rgb(98, 98, 98)">@${tweet.User.account}</a> ‧ ${tweet.updatedAt}</small>  
+                    <small><a href="/users/${tweet.User.id}/tweets" style="text-decoration:none;color:rgb(98, 98, 98)">@${tweet.User.account}</a> ‧ ${dayjs(tweet.updatedAt).locale('zh-tw').fromNow(true)}</small>  
                 </p>
                 <p style="word-wrap: break-word; word-break: normal;">${tweet.description}</p>
             </div>
