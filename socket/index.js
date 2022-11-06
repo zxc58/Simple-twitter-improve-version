@@ -15,8 +15,10 @@ io.on('connection', (socket) => {
       if (receiverSocketId) {
         socket.to(receiverSocketId).emit('get message', JSON.stringify({ message: messageObject, sender: sender.toJSON() }))
         socket.to(receiverSocketId).emit('notify user', messageObject.senderId)
-      } else { console.log('he isnot online') }
-    } catch (error) { console.log(error) }
+      } else { console.log('he is not online') }
+    } catch (error) {
+      console.log(error)
+    }
   })
 
   socket.on('disconnect', async (reason) => {

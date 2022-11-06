@@ -13,7 +13,7 @@ const adminController = {
       })
     }
     req.flash('success_messages', 'Admin成功登入!')
-    res.redirect('/admin/tweets')
+    return res.redirect('/admin/tweets')
   },
   getTweets: async (req, res, next) => {
     try {

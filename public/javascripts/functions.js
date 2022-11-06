@@ -17,7 +17,7 @@ async function toggleLike () {
 }
 function ajaxTweets () {
   const tweetsContainer = document.getElementById('tweetsContainer')
-  const tweetsIds = JSON.parse(document.getElementById('idArray').innerHTML)
+  const tweetsIds = JSON.parse(tweetsContainer.dataset.idArray)
   if (this.scrollHeight <= this.scrollTop + window.innerHeight) {
     this.removeEventListener('scroll', ajaxTweets)
     const apiUrl = '/api/tweets'
@@ -34,7 +34,7 @@ function ajaxTweets () {
             tweetsIds.push(tweet.id)
           }
           tweetsContainer.innerHTML += i
-          document.getElementById('idArray').innerHTML = JSON.stringify(tweetsIds)
+          tweetsContainer.dataset.idArray = JSON.stringify(tweetsIds)
           this.addEventListener('scroll', ajaxTweets)
         }
       }).catch(err => console.log('apiTweetsError' + err))
