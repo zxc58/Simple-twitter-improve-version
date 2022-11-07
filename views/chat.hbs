@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-2">{{> left-nav route='chat'}}</div>
-    <div class="col-3 border-start border-end px-0" style="overflow:auto;">
+    <div class="col-3 border-start border-end px-0" style="overflow:auto;" id="chat-nav" data-new-chatting="{{newchatting}}">
         <nav class="nav flex-column" id="people-group">
             <a class="nav-link border-bottom">
                 <span class="fw-bold text-dark fs-5">
@@ -40,17 +40,5 @@
         </form>
     </div>
 </div>
-<script src="/javascripts/chat.js"></script>
-{{#if newChatting}}
-<script>
-    let x ={
-        id:Number({{newChatting.id}}),
-        name:'{{newChatting.name}}',
-        avatar:'{{newChatting.avatar}}'
-    }
-    if(!document.getElementById('chat-user-{{newChatting.id}}')){
-        document.getElementById('people-group').innerHTML+=newChatter(x,false,'')
-    }
-    document.getElementById('chat-user-{{newChatting.id}}').click()
-</script>
-{{/if}}
+<>
+<script src="/javascripts/chat.js" defer></script>

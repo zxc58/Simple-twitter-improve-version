@@ -1,54 +1,32 @@
-const db = require('../models')
-const { Tweet, User, Like, Reply } = db
-const { catchTopUsers } = require('../helpers/sequelize-helper')
-const helpers = require('../_helpers')
+const { replyServices, userServices, tweetServices } = require('../services')
+
 const replyController = {
-  getReplies: (req, res, next) => {
-    const TweetId = req.params.id
-    return Promise.all([
-      Tweet.findByPk(TweetId, {
-        include: { model: User }, raw: true, nest: true
-      }),
-      catchTopUsers(req),
-      Reply.findAndCountAll({
-        where: { TweetId },
-        include: {
-          model: User, attributes: ['id', 'name', 'account', 'avatar']
-        },
-        raw: true,
-        nest: true,
-        order: [['createdAt', 'DESC']]
-      }), Like.findAndCountAll({
-        where: {
-          TweetId
-        },
-        raw: true,
-        nest: true
-      })
-    ])
-      .then(([tweet, topUsers, replies, likes]) => {
-        if (!tweet) {
-          throw new Error('This tweet id do not exist')
-        }
-        likes.isLiked = likes.rows.some(like => like.UserId === helpers.getUser(req).id)
-        res.render('tweet', { tweet, topUsers, replies, likes })
-      }).catch(err => next(err))
+  getReplies: async (req, res, next) => {
+    try {
+      const [tweet, topUsers, replies] = await Promise.all([
+        tweetServices.getTweet(req),
+        userServices.getTopUsers(req),
+        replyServices.getTweetReply(req)
+      ])
+      if (!tweet) { throw new Error('This tweet id do not exist') }
+      return res.render('tweet', { tweet: tweet.toJSON(), topUsers, replies })
+    } catch (error) {
+      next(error)
+    }
   },
-  postReply: (req, res, next) => {
-    const TweetId = req.params.id
-    const { comment } = req.body
-    return Tweet.findByPk(TweetId)
-      .then(tweet => {
-        if (!tweet) { throw new Error('This tweet id do not exist') }
-        if (!(comment.length <= 140)) { throw new Error('String length exceeds range') }
-        return Reply.create({
-          TweetId,
-          UserId: helpers.getUser(req).id,
-          comment
-        })
-      })
-      .then(() => { res.redirect(`${req.get('Referrer')}`) })
-      .catch(err => next(err))
+
+  postReply: async (req, res, next) => {
+    try {
+      const { comment } = req.body
+      if (!(comment.length <= 140)) { throw new Error('String length exceeds range') }
+      const tweet = await tweetServices.getTweet(req)
+      if (!tweet) { throw new Error('This tweet id do not exist') }
+      await replyServices.reply(req)
+      return res.redirect(`${req.get('Referrer')}`)
+    } catch (error) {
+      next(error)
+    }
   }
 }
+
 module.exports = replyController

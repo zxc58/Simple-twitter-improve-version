@@ -2,38 +2,44 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcryptjs')
 const { User, Message } = require('../models')
+const logger = require('../helpers/winston')
 
 passport.use(new LocalStrategy({
   usernameField: 'account',
   passwordField: 'password',
   passReqToCallback: true
 },
-(req, account, password, done) => {
-  User.findOne({ where: { account } })
-    .then(user => {
-      if (!user) {
-        return done(null, false, req.flash('error_messages', '帳號不存在'))
-      }
-      bcrypt.compare(password, user.password).then(res => {
-        if (!res) {
-          return done(null, false, req.flash('error_messages', '帳號或密碼錯誤'))
-        }
-        return done(null, user)
-      })
-    })
+async (req, account, password, done) => {
+  try {
+    const isUserMatch = await User.findOne({ where: { account } })
+    if (!isUserMatch) { return done(null, false, req.flash('error_messages', '帳號不存在')) }
+    const user = isUserMatch.toJSON()
+    const isPasswordMatch = bcrypt.compareSync(password, user.password)
+    if (!isPasswordMatch) { return done(null, false, req.flash('error_messages', '帳號或密碼錯誤')) }
+    return done(null, user)
+  } catch (error) {
+    logger.error(new Date().toISOString() + ' : ' + error)
+    return done(error)
+  }
 }))
 
 passport.serializeUser((user, done) => {
   done(null, user.id)
 })
 
-passport.deserializeUser((id, done) => {
-  Promise.all([User.findByPk(id), Message.findOne({ where: { receiverId: id, beenseen: 0 } })])
-    .then(([user, newMessage]) => {
-      user = user.toJSON()
-      if (newMessage) { user.notice = true } else { user.notice = false }
-      return done(null, user)
-    }).catch(err => done(err))
+passport.deserializeUser(async (id, done) => {
+  try {
+    let [user, hasNewMessage] = await Promise.all([
+      User.findByPk(id),
+      Message.findOne({ where: { receiverId: id, beenseen: 0 } })
+    ])
+    user = user.toJSON()
+    user.notice = !!hasNewMessage
+    return done(null, user)
+  } catch (error) {
+    logger.error(new Date().toISOString() + ' : ' + error)
+    return done(error)
+  }
 })
 
 module.exports = passport

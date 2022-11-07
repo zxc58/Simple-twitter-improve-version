@@ -4,7 +4,7 @@
     <div class="col-7 border-start border-end px-0">
         <div class="d-flex py-2">
             <h4 class="my-0 pe-0 me-0 fw-bold blockstyle" onclick="history.back()" >←</h4>
-            <h4 class="my-0 ms-0 px-1 fw-bold">推文</h4>
+            <h4 class="my-0 ms-0 px-1 fw-bold">推文{{tweet.id}}</h4>
         </div>
         <hr class="my-2 "/>
         <div class="row mx-0 px-0">
@@ -30,13 +30,10 @@
         </div>
         <hr class="my-2 "/>
         <div class="row mx-0 px-0">
-            <div class="col">{{replies.count}}回覆  <span id="totalLike">{{likes.count}}</span>喜歡次數</div>
-        </div>
-        <hr class="my-2 "/>
-        <div class="row mx-0 px-0">
             <div class="d-flex">
                 <div class="col-1">
                     <button type="button" class="border-0 bg-body" data-bs-toggle="modal" data-bs-target="#tweet{{tweet.id}}Reply"><i class="far fa-comment"></i></button>
+                {{replies.count}}
                 </div>
                 <div class="modal fade" id="tweet{{tweet.id}}Reply" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -45,6 +42,7 @@
                                 <div>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
+                                
                             </div>
                             <div class="modal-body row">
                                 <div class="col-2 me-0" >
@@ -73,13 +71,14 @@
                         </div>
                     </div>
                 </div>
-                <button class="border-0 bg-body" onclick="toggleLike(this)" data-is-liked={{likes.isLiked}} data-tweet-id="{{tweet.id}}" >
-                    {{#if likes.isLiked}}
+                <button class="border-0 bg-body" onclick="toggleLike.bind(this)()" data-is-liked="{{tweet.isLiked}}" data-tweet-id="{{tweet.id}}" >
+                    {{#if tweet.isLiked}}
                     <i class="fas fa-heart text-danger"></i>
                     {{else}}
                     <i class="far fa-heart"></i>
                     {{/if}}
                 </button>
+                <span id="totalLike">{{tweet.totalLike}}</span>
             </div>
         </div>
         <hr class="mt-2 mb-0"/>

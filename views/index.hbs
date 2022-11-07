@@ -16,8 +16,7 @@
             </div>
         </form>
         <hr class="my-0 "style="border: 10px solid rgb(106, 106, 106);"/>
-        <div id="tweetsContainer">
-            <div style="display: none;" id="idArray">{{ids}}</div>
+        <div id="tweetsContainer" data-id-array="{{ids}}">
             {{#each tweets}}
                 {{> tweet-block  tweet=this logInUser=../logInUser}}
             {{/each}}
@@ -25,6 +24,5 @@
     </div>
     <div class="col-3">{{> right-nav}}</div>
 </div>
-<script src="/javascripts/scroll.js"></script>
-<script src="/javascripts/autoLoad.js"></script>
-<script src="/javascripts/ajax.js"></script> 
+
+<script src="/javascripts/ajax-tweets.js" defer></script>

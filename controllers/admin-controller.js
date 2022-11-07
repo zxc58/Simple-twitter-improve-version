@@ -1,80 +1,50 @@
-const { Tweet, User, Like } = require('../models')
-
+// const { getAllUsers, getAllTweets, deleteTweet } = require('../sequelize/admin')
+const { userServices, tweetServices } = require('../services')
 const helpers = require('../_helpers')
-
 const adminController = {
   signInPage: (req, res) => {
-    res.render('admin/signin')
+    return res.render('admin/signin')
   },
   signIn: (req, res) => {
     if (helpers.getUser(req).role === 'user') {
-      req.flash('error_messages', '帳號不存在')
-      req.logout()
-      res.redirect('/signin')
+      return req.logout(() => {
+        req.flash('error_messages', '帳號不存在')
+        res.redirect('/signin')
+      })
     }
-    req.flash('success_messages', 'Admin成功登入！')
-    res.redirect('/admin/tweets')
+    req.flash('success_messages', 'Admin成功登入!')
+    return res.redirect('/admin/tweets')
   },
-  getTweets: (req, res, next) => {
-    Tweet.findAll({
-      raw: true,
-      nest: true,
-      include: [User],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(tweets => {
-        const tweetPreview = tweets.map(t => ({
-          ...t,
-          description: t.description.substring(0, 50)
-        }))
-        return res.render('admin/tweets', {
-          tweets: tweetPreview
-        })
-      })
-      .catch(err => next(err))
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await tweetServices.previewAllTweets(req)
+      return res.render('admin/tweets', { tweets })
+    } catch (error) {
+      next(error)
+    }
   },
-  deleteTweet: (req, res, next) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        if (!tweet) throw new Error("Tweet didn't exist!")
-        return tweet.destroy()
-      })
-      .then(() => res.redirect('/admin/tweets'))
-      .catch(err => next(err))
+  deleteTweet: async (req, res, next) => {
+    try {
+      const isDeleted = await tweetServices.deleteTweet(req)
+      if (!isDeleted) { throw new Error('No such tweet in Database') }
+      return res.redirect('/admin/tweets')
+    } catch (error) {
+      next(error)
+    }
   },
-  getUsers: (req, res, next) => {
-    return User.findAll({
-      nest: true,
-      include: [
-        { model: Tweet, include: Like },
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
-    })
-      .then(users => {
-        let data = users
-          .map(user => ({
-            ...user.toJSON(),
-            tweetCount: user.Tweets.length,
-            likeCount: function () {
-              let userLikes = 0
-              user.Tweets.forEach(tweet => {
-                userLikes += tweet.Likes.length
-              })
-              return userLikes
-            },
-            followers: user.Followers.length,
-            followings: user.Followings.length
-          }))
-        data = data.sort((a, b) => b.tweetCount - a.tweetCount)
-        res.render('admin/users', { users: data })
-      })
-      .catch(err => next(err))
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await userServices.getAllUsers(req)
+      return res.render('admin/users', { users })
+    } catch (error) {
+      next(error)
+    }
   },
   logout: (req, res) => {
-    req.flash('success_messages', '登出成功!')
-    req.logout()
-    res.redirect('/admin/signin')
+    return req.logout(() => {
+      req.flash('success_messages', '登出成功!')
+      res.redirect('/admin/signin')
+    })
   }
 }
 

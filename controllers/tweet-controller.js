@@ -1,53 +1,29 @@
-const db = require('../models')
-const { Tweet, User, Like, Reply, sequelize } = db
-const { catchTopUsers } = require('../helpers/sequelize-helper')
-const helpers = require('../_helpers')
+const { tweetServices, userServices } = require('../services')
 const tweetController = {
-  getTweets: (req, res, next) => {
-    const limit = Number(req.query.limit) || 20
-    return Promise.all([Tweet.findAll({
-      include: [{
-        model: User,
-        attributes: ['id', 'name', 'avatar', 'account']
-      }, {
-        model: Like, attributes: [], duplicating: false
-      }, {
-        model: Reply, attributes: [], duplicating: false
-      }],
-      attributes: {
-        include: [
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'],
-          [sequelize.fn('MAX', sequelize.fn('IF', sequelize.literal('`Likes`.`UserId`-' + helpers.getUser(req).id + '=0'), 1, 0)), 'isLiked']
-        ]
-      },
-      distinct: true,
-      group: 'Tweet.id',
-      order: [['createdAt', 'DESC']],
-      limit,
-      raw: true,
-      nest: true
-    }),
-    catchTopUsers(req)
-    ])
-      .then(([tweets, topUsers]) => {
-        const ids = JSON.stringify(tweets.map(e => e.id))
-        res.render('index', { tweets, topUsers, ids })
-      }).catch(err => next(err))
-  },
-  postTweet: (req, res, next) => {
-    const UserId = helpers.getUser(req).id
-    const description = req.body.description
-    if (!(description.length <= 140)) {
-      req.flash('error_messages', 'String length exceeds range')
-      return res.redirect('/tweets')
+  getTweets: async (req, res, next) => {
+    try {
+      const [tweets, topUsers] = await Promise.all([
+        tweetServices.getAllTweets(req),
+        userServices.getTopUsers(req)
+      ])
+      const ids = JSON.stringify(tweets.map(e => e.id))
+      return res.render('index', { tweets, topUsers, ids })
+    } catch (error) {
+      next(error)
     }
-    return Tweet.create({
-      description,
-      UserId
-    })
-      .then(() => res.redirect(`${req.get('Referrer')}`))
-      .catch(err => next(err))
+  },
+  postTweet: async (req, res, next) => {
+    try {
+      const description = req.body.description
+      if (!(description.length <= 140)) {
+        req.flash('error_messages', 'String length exceeds range')
+        return res.redirect('/tweets')
+      }
+      await tweetServices.postTweet(req)
+      return res.redirect(`${req.get('Referrer')}`)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 module.exports = tweetController
