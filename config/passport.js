@@ -14,7 +14,7 @@ async (req, account, password, done) => {
     const isUserMatch = await User.findOne({ where: { account } })
     if (!isUserMatch) { return done(null, false, req.flash('error_messages', '帳號不存在')) }
     const user = isUserMatch.toJSON()
-    const isPasswordMatch = bcrypt.compareSync(password, isUserMatch.password)
+    const isPasswordMatch = bcrypt.compareSync(password, user.password)
     if (!isPasswordMatch) { return done(null, false, req.flash('error_messages', '帳號或密碼錯誤')) }
     return done(null, user)
   } catch (error) {
