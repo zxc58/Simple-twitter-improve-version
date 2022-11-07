@@ -19,7 +19,7 @@ module.exports = {
         combinationArray.push([u.id, t.id])
       }
     }
-    return queryInterface.bulkInsert('Likes',
+    await queryInterface.bulkInsert('Likes',
       Array.from({ length: tweetIds.length }, () => {
         const index = Math.floor(Math.random() * combinationArray.length)
         const [UserId, TweetId] = combinationArray.splice(index, 1)[0]

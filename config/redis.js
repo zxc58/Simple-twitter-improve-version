@@ -1,10 +1,14 @@
 const redis = require('redis')
-const client = redis.createClient()
-client.on('connect', () => {
-  console.log('Redis client connected')
+const redisClient = redis.createClient({
+  url: process.env.REDIS_CONNECT_STRING || 'redis://localhost:6379',
+  legacyMode: true
 })
-client.on('error', () => { console.error('redis on error') })
+const logger = require('../helpers/winston')
+redisClient.on('connect', () => {
+  logger.info('Redis client connected')
+})
+redisClient.on('error', () => { logger.error('redis on error') })
 
-client.connect()
+redisClient.connect()
 
-module.exports = client
+module.exports = redisClient

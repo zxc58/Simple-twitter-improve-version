@@ -12,7 +12,7 @@ module.exports = {
         if (!(i.id === j.id)) { combinationArray.push([i.id, j.id]) }
       }
     }
-    return queryInterface.bulkInsert('Followships',
+    await queryInterface.bulkInsert('Followships',
       Array.from({ length: 6 }, () => {
         const index = Math.floor(Math.random() * combinationArray.length)
         const [followerId, followingId] = combinationArray.splice(index, 1)[0]

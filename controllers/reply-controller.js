@@ -21,7 +21,7 @@ const replyController = {
       if (!(comment.length <= 140)) { throw new Error('String length exceeds range') }
       const tweet = await tweetServices.getTweet(req)
       if (!tweet) { throw new Error('This tweet id do not exist') }
-      await replyServices.reply(req)
+      await replyServices.postReply(req)
       return res.redirect(`${req.get('Referrer')}`)
     } catch (error) {
       next(error)

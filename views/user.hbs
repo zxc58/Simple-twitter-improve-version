@@ -52,13 +52,13 @@
             </div>
         </div>
         <div class="row mx-0 px-0">
-            <a class="col text-center pb-2" href="/users/{{user.id}}/tweets" style="text-decoration:none;{{#if user.Tweets}}color:#FF6600;border-bottom:solid;border-color:#FF6600;{{else}}color:black;{{/if}}">
+            <a class="col text-center pb-2" href="/users/{{user.id}}/tweets" style="text-decoration:none;{{#if tweets}}color:#FF6600;border-bottom:solid;border-color:#FF6600;{{else}}color:black;{{/if}}">
                 推文
             </a>
             <a class="col text-center pb-2 " href="/users/{{user.id}}/replies" style="text-decoration:none;{{#if userReplies}}color:#FF6600;border-bottom:solid;border-color:#FF6600;{{else}}color:black;{{/if}}">
                 回覆
             </a>
-            <a class="col-2 text-center pb-2 " href="/users/{{user.id}}/likes" style="text-decoration:none;{{#if user.Likes}}color:#FF6600;border-bottom:solid;border-color:#FF6600;{{else}}color:black;{{/if}}">
+            <a class="col-2 text-center pb-2 " href="/users/{{user.id}}/likes" style="text-decoration:none;{{#if likes}}color:#FF6600;border-bottom:solid;border-color:#FF6600;{{else}}color:black;{{/if}}">
                 喜歡的內容
             </a>
             <div class="col-7"></div>
@@ -76,7 +76,7 @@
             {{/if}}
 
             {{#if userReplies}}
-                {{#each user.Replies}}
+                {{#each userReplies}}
                     {{> reply-block tweet=this.Tweet User=../user click=true}}
                 {{/each}}
             {{/if}}
