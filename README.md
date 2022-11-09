@@ -1,5 +1,6 @@
 # Simple Twitter
-Simple Twitter是一個使用Express及MySQL打造出的社群網站。使用者需要註冊之後才能夠使用社群網站的功能。
+Simple Twitter是一個使用Express框架socket.io框架，使用Redis作為session儲存庫，使用MySQL資料庫管理系統打造出的社群網站。使用者需要註冊之後才能夠使用社群網站的功能。此專案將同步部屬於AWS
+http://simple-twitter-env.eba-xtzbgkmb.us-east-2.elasticbeanstalk.com/signin
 
 
 ## 功能
@@ -20,11 +21,11 @@ Simple Twitter是一個使用Express及MySQL打造出的社群網站。使用者
 * 使用者可以在追隨頁面查看追隨狀況（追隨者、正在追隨）。
 * 使用者可以跟隨及取消跟隨其他使用者。
 * 使用者可以在首頁的側邊欄看到跟隨數量前十名的使用者。
+* 使用者可以於其他使用者進行私聊。
 * 經過授權的管理者（admin）可從專門的後台登入頁面進入網站後台。
 * 管理者可以瀏覽網站上的推文清單（只顯示推文的前五十個字）。
 * 管理者可以在推文清單上刪除任何人的推文。
 * 管理者可以瀏覽所有的使用者清單（包括使用者推文數量、推文被喜歡的數量、關注人數、跟隨者人數）。
-
 ## 專案安裝步驟
 1. 下載專案
     ```
@@ -92,3 +93,5 @@ Simple Twitter是一個使用Express及MySQL打造出的社群網站。使用者
 * imgur 1.0.2
 * Bootstrap 5.1.3
 * Font-awesome Latest 5.x
+* redis 4.4.0
+* socket.io 4.5.1
