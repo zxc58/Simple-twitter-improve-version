@@ -24,8 +24,8 @@ const userController = {
     try {
       const { account, email } = req.body
       const user = (await userServices.checkDuplicates(req)).toJSON()
-      if (user.email === email) { throw new Error('email 已重複註冊！') }
-      if (user.account === account) { throw new Error('account 已重複註冊！') }
+      if (user?.email === email) { throw new Error('email 已重複註冊！') }
+      if (user?.account === account) { throw new Error('account 已重複註冊！') }
       await userServices.postUser(req)
       req.flash('success_message', '成功註冊帳號!')
       return res.redirect('/signin')
@@ -58,8 +58,8 @@ const userController = {
       if (helpers.getUser(req).id !== id) { throw new Error('無法編輯他人資料!') }
       const { account, email } = req.body
       const checkResult = (await userServices.checkDuplicates(req))?.toJSON()
-      if (checkResult.email === email) { throw new Error('email 已重複註冊！') }
-      if (checkResult.account === account) { throw new Error('account 已重複註冊！') }
+      if (checkResult?.email === email) { throw new Error('email 已重複註冊！') }
+      if (checkResult?.account === account) { throw new Error('account 已重複註冊！') }
       await userServices.putUser(req)
       req.flash('success_messages', '使用者資料編輯成功')
       return res.redirect('/')
