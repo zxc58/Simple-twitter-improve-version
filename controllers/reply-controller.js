@@ -17,8 +17,6 @@ const replyController = {
 
   postReply: async (req, res, next) => {
     try {
-      const { comment } = req.body
-      if (!(comment.length <= 140)) { throw new Error('String length exceeds range') }
       const tweet = await tweetServices.getTweet(req)
       if (!tweet) { throw new Error('This tweet id do not exist') }
       await replyServices.postReply(req)
