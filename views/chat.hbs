@@ -1,6 +1,10 @@
 <div class="row">
     <div class="col-2">{{> left-nav route='chat'}}</div>
-    <div class="col-3 border-start border-end px-0" style="overflow:auto;" id="chat-nav" data-new-chatting="{{newchatting}}">
+    <div class="col-3 border-start border-end px-0" style="overflow:auto;" id="chat-nav" 
+    data-new-chatting-id="{{newChatting.id}}"
+    data-new-chatting-name="{{newChatting.name}}"
+    data-new-chatting-avatar="{{newChatting.avatar}}"
+    >
         <nav class="nav flex-column" id="people-group">
             <a class="nav-link border-bottom">
                 <span class="fw-bold text-dark fs-5">
@@ -10,7 +14,7 @@
             {{#each chatUsers}}
                 <a class="nav-link border-bottom blockstyle " name="chat-user" id="chat-user-{{this.id}}" data-user-id="{{this.id}}" onclick="change(this)">
                     <img src="{{this.avatar}}" class="rounded-circle" style="width:40px;height:40px">
-
+                    
                     <span class="fs-5 fw-bold text-dark" id="chat-user-name">{{this.name}}</span>
                     <br/>
                     {{#compareTime this.sentMessages.createdAt this.receivedMessages.createdAt}}
@@ -40,5 +44,4 @@
         </form>
     </div>
 </div>
-<>
 <script src="/javascripts/chat.js" defer></script>

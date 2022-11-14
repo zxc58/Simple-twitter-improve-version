@@ -11,8 +11,12 @@ const receiverInput = document.getElementById('receiver-input')
 const peopleGroup = document.getElementById('people-group')
 const chatNav = document.getElementById('chat-nav')
 //
-const newChatting = chatNav.dataset.newChatter ? JSON.parse(chatNav.dataset.newChatter) : null
-if (newChatting) {
+if (chatNav.dataset.newChattingId) {
+  const newChatting = {
+    id: chatNav.dataset.newChattingId,
+    avatar: chatNav.dataset.newChattingAvatar,
+    name: chatNav.dataset.newChattingName
+  }
   if (!document.getElementById(`chat-user-${newChatting.id}`)) {
     document.getElementById('people-group').innerHTML += newChatter(newChatting, false, '')
   }
@@ -25,7 +29,6 @@ chatBody.style.height = window.innerHeight * 0.9 + 'px'
 chatArea.addEventListener('click', () => {
   if (receiverInput.value) {
     document.getElementById(`chat-user-${receiverInput.value}`).querySelector('i').classList.add('hidden')
-    // deal with notice-point at left-nav
     const points = document.getElementsByName('point')
     let hiddenLeftNavPoint = true
     for (const point of points) {
@@ -49,15 +52,15 @@ chatForm.addEventListener('submit', function (e) {
       content: chatInput.value,
       date: new Date().toISOString()
     }
-    socket.emit('post message', JSON.stringify(message))
+    socket.emit('privateMessage', message)
     chatContent.innerHTML += myMessage(chatInput.value)
     chatContent.scrollTop = chatContent.scrollHeight
     document.getElementById(`chat-user-${receiverInput.value}`).querySelector('small').innerHTML = chatInput.value
     chatInput.value = ''
   }
 })
-socket.on('get message', async (message) => {
-  const { senderId, content } = JSON.parse(message).message
+socket.on('privateMessage', (message, sender) => {
+  const { senderId, content } = message
   const chatUser = document.getElementById(`chat-user-${senderId}`)
   publicChatRemind.classList.remove('hidden')
   if (senderId === receiverInput.value) {
@@ -69,8 +72,7 @@ socket.on('get message', async (message) => {
     chatUser.querySelector('i').classList.remove('hidden')
     chatUser.querySelector('small').innerHTML = content
   } else {
-    // add a new nav for this sender
-    document.getElementById('people-group').innerHTML += newChatter(JSON.parse(message).sender, true, content)
+    document.getElementById('people-group').innerHTML += newChatter(sender, true, content)
   }
 })
 

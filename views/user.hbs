@@ -84,7 +84,7 @@
     </div>
     <div class="col-3">{{> right-nav}}</div>
 </div>
-
+{{#ifCond user.id logInUser.id}}
 <!-- Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
@@ -136,4 +136,5 @@
     </div>
 </div>
 
-<script src="/javascripts/editModal.js" defer></script>
+<script src="/javascripts/editModal.js" ></script>
+{{/ifCond}}

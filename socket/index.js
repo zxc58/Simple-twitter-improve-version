@@ -1,27 +1,25 @@
-const { Message, User } = require('../models')
+const { Message } = require('../models')
 const io = require('./setting/io')
 io.on('connection', (socket) => {
   const { userId } = socket.handshake.query
   socket.userId = userId
-  socket.on('post message', async (message) => {
+  socket.on('privateMessage', async (message) => {
     try {
-      const messageObject = JSON.parse(message)
-      Message.create(JSON.parse(message))
-      const [sender, sockets] = await Promise.all([
-        User.findByPk(Number(messageObject.senderId), { attributes: ['id', 'avatar', 'name'] }),
-        io.fetchSockets()
-      ])
-      const receiverSocketId = sockets.find(socket => socket.userId === messageObject.receiverId).id
+      const { id, avatar, name } = socket.request.user
+      const sender = { id, avatar, name }
+      Message.create(message)
+      const sockets = await io.fetchSockets()
+      const receiverSocketId = sockets.find(socket => socket.userId === message.receiverId)?.id
       if (receiverSocketId) {
-        socket.to(receiverSocketId).emit('get message', JSON.stringify({ message: messageObject, sender: sender.toJSON() }))
-        socket.to(receiverSocketId).emit('notify user', messageObject.senderId)
-      } else { console.log('he is not online') }
+        socket.to(receiverSocketId).emit('privateMessage', message, sender)
+        socket.to(receiverSocketId).emit('notify')
+      }
     } catch (error) {
       console.log(error)
     }
   })
 
-  socket.on('disconnect', async (reason) => {
+  socket.on('disconnect', async () => {
   })
 })
 module.exports = io

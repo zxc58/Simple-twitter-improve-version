@@ -6,6 +6,6 @@ const publicChatRemind = document.getElementById('public-chat-remind')
 const { userId } = leftNav.dataset
 const socket = io({ query: { userId } })
 //
-socket.on('notify user', (senderId) => {
+socket.on('notify', () => {
   publicChatRemind.classList.remove('hidden')
 })
