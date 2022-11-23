@@ -12,10 +12,25 @@ module.exports = {
         type: Sequelize.STRING
       },
       senderId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: {
+            tableName: 'Users'
+          },
+          key: 'id'
+        },
+        allowNull: false,
+        onDelete: 'CASCADE'
       },
       receiverId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: {
+            tableName: 'Users'
+          },
+          key: 'id'
+        },
+        allowNull: false
       },
       beenSeen: {
         type: Sequelize.INTEGER
